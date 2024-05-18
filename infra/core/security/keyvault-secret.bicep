@@ -10,7 +10,7 @@ param enabled bool = true
 param exp int = 0
 param nbf int = 0
 
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: name
   tags: tags
   parent: keyVault

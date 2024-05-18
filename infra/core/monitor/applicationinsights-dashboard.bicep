@@ -123,7 +123,7 @@ resource applicationInsightsDashboard 'Microsoft.Portal/dashboards@2020-09-01-pr
                   value: {
                     durationMs: 86400000
                     endTime: null
-                    createdTime: '2018-05-04T01:20:33.345Z'
+                    createdTime: '2024-05-04T01:20:33.345Z'
                     isInitialTime: true
                     grain: 1
                     useDashboardTimeRange: false
@@ -164,7 +164,7 @@ resource applicationInsightsDashboard 'Microsoft.Portal/dashboards@2020-09-01-pr
                   value: {
                     durationMs: 86400000
                     endTime: null
-                    createdTime: '2018-05-08T18:47:35.237Z'
+                    createdTime: '2024-05-08T18:47:35.237Z'
                     isInitialTime: true
                     grain: 1
                     useDashboardTimeRange: false
@@ -226,7 +226,7 @@ resource applicationInsightsDashboard 'Microsoft.Portal/dashboards@2020-09-01-pr
                   value: {
                     durationMs: 86400000
                     endTime: null
-                    createdTime: '2018-05-04T01:22:35.782Z'
+                    createdTime: '2024-05-04T01:22:35.782Z'
                     isInitialTime: true
                     grain: 1
                     useDashboardTimeRange: false
@@ -281,7 +281,7 @@ resource applicationInsightsDashboard 'Microsoft.Portal/dashboards@2020-09-01-pr
                     version: '1.0.0'
                     timeContext: {
                       durationMs: 86400000
-                      createdTime: '2018-05-04T23:42:40.072Z'
+                      createdTime: '2024-05-04T23:42:40.072Z'
                       isInitialTime: false
                       grain: 1
                       useDashboardTimeRange: false
@@ -345,7 +345,7 @@ resource applicationInsightsDashboard 'Microsoft.Portal/dashboards@2020-09-01-pr
                     version: '1.0.0'
                     timeContext: {
                       durationMs: 86400000
-                      createdTime: '2018-05-04T23:43:37.804Z'
+                      createdTime: '2024-05-04T23:43:37.804Z'
                       isInitialTime: false
                       grain: 1
                       useDashboardTimeRange: false
@@ -415,7 +415,7 @@ resource applicationInsightsDashboard 'Microsoft.Portal/dashboards@2020-09-01-pr
                   name: 'TimeContext'
                   value: {
                     durationMs: 86400000
-                    createdTime: '2018-05-08T12:16:27.534Z'
+                    createdTime: '2024-05-08T12:16:27.534Z'
                     isInitialTime: false
                     grain: 1
                     useDashboardTimeRange: false

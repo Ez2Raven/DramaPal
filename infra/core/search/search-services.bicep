@@ -35,7 +35,7 @@ param replicaCount int = 1
 ])
 param semanticSearch string = 'disabled'
 
-resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
+resource search 'Microsoft.Search/searchServices@2024-03-01-preview' = {
   name: name
   location: location
   tags: tags

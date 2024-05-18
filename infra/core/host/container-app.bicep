@@ -88,7 +88,7 @@ module containerRegistryAccess '../security/registry-access.bicep' = if (usePriv
   }
 }
 
-resource app 'Microsoft.App/containerApps@2023-04-01-preview' = {
+resource app 'Microsoft.App/containerApps@2023-11-02-preview' = {
   name: name
   location: location
   tags: tags
@@ -149,7 +149,7 @@ resource app 'Microsoft.App/containerApps@2023-04-01-preview' = {
   }
 }
 
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-04-01-preview' existing = {
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-11-02-preview' existing = {
   name: containerAppsEnvironmentName
 }
 

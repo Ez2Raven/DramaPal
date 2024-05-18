@@ -33,8 +33,7 @@ param zoneRedundancy string = 'Disabled'
 @description('The log analytics workspace ID used for logging and monitoring')
 param workspaceId string = ''
 
-// 2022-02-01-preview needed for anonymousPullEnabled
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = {
   name: name
   location: location
   tags: tags
