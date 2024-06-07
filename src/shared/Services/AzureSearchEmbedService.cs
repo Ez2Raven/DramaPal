@@ -76,13 +76,13 @@ public sealed partial class AzureSearchEmbedService(
         logger?.LogInformation(
             "Creating '{searchIndexName}' search index", searchIndexName);
 
-        await searchIndexClient.CreateIndexAsync(index);
+        await searchIndexClient.CreateIndexAsync(index, ct);
     }
 
     public async Task EnsureSearchIndexAsync(string searchIndexName, CancellationToken ct = default)
     {
-        var indexNames = searchIndexClient.GetIndexNamesAsync();
-        await foreach (var page in indexNames.AsPages())
+        var indexNames = searchIndexClient.GetIndexNamesAsync(ct);
+        await foreach (var page in indexNames.AsPages().WithCancellation(ct))
         {
             if (page.Values.Any(indexName => indexName == searchIndexName))
             {

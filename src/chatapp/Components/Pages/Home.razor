@@ -1,0 +1,231 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using System.ClientModel
+@using System.Security.Claims
+@using System.Text
+@using Azure.AI.OpenAI;
+@using Azure.Identity
+@using Microsoft.Extensions.Options
+@using OpenAI.Chat
+@inject IConfiguration _configuration;
+@inject IJSRuntime _jsRuntime;
+@using shared.Services
+@inject AuditLogger AuditLogger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@code {
+    string _openAiEndpoint = "";
+    List<ChatMessage> _messageHistory = new List<ChatMessage>();
+
+    string _prompt = "Write a 10 word description of OpenAI ChatGPT";
+
+    // Error message that will be displayed on the UI
+    string _errorMessage = "";
+
+    // Control flag to hide ui elements when it is in a processing state.
+    bool _processing = false;
+    string _initialPrompt = string.Empty;
+    string _modelDeploymentName = String.Empty;
+
+    string userEmail = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AzureOpenAIServiceOptions azureOpenAiServiceOptions = _configuration.Get<AzureOpenAIServiceOptions>() ?? new AzureOpenAIServiceOptions();
+        var authState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+        ClaimsPrincipal user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            var userEmailClaim = user.Claims.FirstOrDefault(x => x.Type == "emails");
+            if (userEmailClaim == null)
+            {
+                throw new InvalidOperationException("emails claim must be enabled in OIDC IdP.");
+            }
+
+            userEmail = userEmailClaim.Value;
+
+            AuditLogger.LogAuditEvent(userEmail, "navigation", "Home Page");
+
+            _openAiEndpoint = _configuration["AzureOpenAIServiceOptions:Endpoint"] ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(_openAiEndpoint))
+            {
+                throw new InvalidOperationException("AzureOpenAIServiceOptions:Endpoint cannot be empty.");
+            }
+
+            IConfigurationSection initalPromptSection =
+                _configuration.GetSection("AzureOpenAIServiceOptions:InitialPrompt") ??
+                throw new InvalidOperationException("AzureOpenAIServiceOptions:InitialPrompt is empty! Terminating chat)");
+
+            foreach (var item in initalPromptSection.AsEnumerable())
+            {
+                _initialPrompt += item.Value;
+            }
+
+            if (string.IsNullOrEmpty(_initialPrompt))
+            {
+                throw new InvalidOperationException("AzureOpenAIServiceOptions:InitialPrompt is empty! Terminating chat.");
+            }
+
+            _modelDeploymentName = _configuration["AzureOpenAIServiceOptions:DeploymentOrModelName"] ?? string.Empty;
+            if (string.IsNullOrEmpty(_modelDeploymentName))
+            {
+                throw new InvalidOperationException("AzureOpenAIServiceOptions:DeploymentOrModelName is empty! Terminating chat.");
+            }
+
+            _prompt = "Hi, My name is " + user.Identity.Name + ". It's a pleasure to meet you, how are you doing?";
+            await SendMessageToChatGPT(false);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            await _jsRuntime.InvokeAsync<string>("ScrollToBottom", "chatcontainer");
+        }
+        catch
+        {
+            // do nothing if this fails
+        }
+    }
+
+    private async Task SendMessageToChatGPT(bool addToHistory)
+    {
+        try
+        {
+            AuditLogger.LogAuditEvent(userEmail, "start_prompt", _prompt);
+
+            // Set a control flag to hide ui elements when it is in a processing state.
+            _processing = true;
+
+            // Refresh the UI
+            StateHasChanged();
+
+            // Clear any previous error messages
+            _errorMessage = "";
+
+            var azureClient = new AzureOpenAIClient(new Uri(_openAiEndpoint),
+                new DefaultAzureCredential());
+
+            // Create a new list of chatMessages objects using the message history
+            // if there are no messages in the history, add the default system message to prompt the LLM
+            var chatMessages = new List<ChatMessage>();
+
+            if (_messageHistory.Count == 0)
+            {
+                chatMessages.Add(new SystemChatMessage(_initialPrompt));
+            }
+
+            chatMessages.AddRange(_messageHistory);
+
+            // add user message if it's not the seeding user prompt
+            chatMessages.Add(new UserChatMessage(_prompt));
+            if (addToHistory)
+            {
+                // Create a new MessageHistoryEntry object with the user's prompt 
+                _messageHistory.Add(new UserChatMessage(_prompt));
+            }
+
+            ChatClient chatClient = azureClient.GetChatClient(_modelDeploymentName);
+            AsyncResultCollection<StreamingChatCompletionUpdate> completionUpdates = chatClient.CompleteChatStreamingAsync(chatMessages);
+
+            
+
+            StringBuilder responseBuilder = new StringBuilder();
+            await foreach (StreamingChatCompletionUpdate completionUpdate in completionUpdates)
+            {
+                foreach (ChatMessageContentPart contentPart in completionUpdate.ContentUpdate)
+                {
+                    responseBuilder.Append(contentPart.Text);
+                }
+            }
+
+            _messageHistory.Add(new AssistantChatMessage(responseBuilder.ToString()));
+        }
+        catch (Exception ex)
+        {
+            // Set ErrorMessage to the exception message if an error occurs
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _prompt = "";
+
+            _processing = false;
+
+            StateHasChanged();
+        }
+    }
+
+    private void RestartChatGPT()
+    {
+        _prompt = "Write a 10 word description of OpenAI ChatGPT";
+        _messageHistory = new List<ChatMessage>();
+        _errorMessage = "";
+        StateHasChanged();
+    }
+
+}
+
+<PageTitle>DramaPal</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        <h1>DramaPal</h1>
+        <div id="chatcontainer" style="height:550px; width:80%; overflow: scroll;">
+            @foreach (var item in _messageHistory)
+            {
+                <div>
+                    @if (item is UserChatMessage)
+                    {
+                        <div style="float: right; margin-right: 20px; margin-top: 10px">
+                            <b>You</b>
+                        </div>
+                        <div class="user">
+                            <div class="msg">
+                                @item.toText()
+                            </div>
+                        </div>
+                    }
+                    @if (item is AssistantChatMessage)
+                    {
+                        <div style="float: left; margin-left: 20px; margin-top: 10px">
+                            <b>Allison&nbsp;&nbsp;</b>
+                        </div>
+                        <div class="assistant">
+                            <div class="msg">
+                                @item.toText();
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (!_processing)
+        {
+            <textarea rows="3" cols="60" @bind="_prompt" />
+            <br/>
+            <button class="btn btn-primary"
+                    @onclick="@(e => SendMessageToChatGPT(true))">
+                Send
+            </button>
+            <span>&nbsp;</span>
+            <button class="btn btn-info"
+                    @onclick="RestartChatGPT">
+                Restart
+            </button>
+        }
+        else
+        {
+            <br>
+            <h4>Processing...</h4>
+        }
+        <br/>
+        <p style="color:red">@_errorMessage</p>
+    </Authorized>
+    <NotAuthorized>
+        <p style="color:cornflowerblue">Please Sign In to use DramaPal</p>
+    </NotAuthorized>
+</AuthorizeView>
