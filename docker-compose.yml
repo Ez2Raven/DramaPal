@@ -1,0 +1,22 @@
+﻿services:
+  dramapal:
+    image: dramapal
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      "AzureOpenAIServiceOptions:InitialPrompt:1": $${AzureOpenAIServiceOptions:InitialPrompt:1}
+      "AzureOpenAIServiceOptions:InitialPrompt:2": $${AzureOpenAIServiceOptions:InitialPrompt:2}
+      "AzureOpenAIServiceOptions:InitialPrompt:3": $${AzureOpenAIServiceOptions:InitialPrompt:3}
+      "AzureOpenAIServiceOptions:InitialPrompt:4": $${AzureOpenAIServiceOptions:InitialPrompt:4}
+      "AzureOpenAIServiceOptions:InitialPrompt:5": $${AzureOpenAIServiceOptions:InitialPrompt:5}
+      "AzureOpenAIServiceOptions:InitialPrompt:6": $${AzureOpenAIServiceOptions:InitialPrompt:6}
+      "AzureOpenAIServiceOptions:InitialPrompt:7": $${AzureOpenAIServiceOptions:InitialPrompt:7}
+      "AzureOpenAIServiceOptions:InitialPrompt:8": $${AzureOpenAIServiceOptions:InitialPrompt:8}
+      "AzureOpenAIServiceOptions:InitialPrompt:9": $${AzureOpenAIServiceOptions:InitialPrompt:9}
+      "AzureOpenAIServiceOptions:InitialPrompt:10": $${AzureOpenAIServiceOptions:InitialPrompt:10}
+      "AzureOpenAIServiceOptions:InitialPrompt:11": $${AzureOpenAIServiceOptions:InitialPrompt:11}
+      "AzureOpenAIServiceOptions:Endpoint": $${AzureOpenAIServiceOptions:Endpoint}
+      "AzureOpenAIServiceOptions:DeploymentOrModelName": $${AzureOpenAIServiceOptions:DeploymentOrModelName}
+    ports:
+      - "8080:8080"
