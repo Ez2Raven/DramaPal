@@ -126,6 +126,7 @@
             {
                 // Create a new MessageHistoryEntry object with the user's prompt 
                 _messageHistory.Add(new UserChatMessage(_prompt));
+                AuditLogger.LogAuditEvent(userEmail, "add_user_prompt", _prompt);
             }
 
             ChatClient chatClient = azureClient.GetChatClient(_modelDeploymentName);
@@ -143,6 +144,7 @@
             }
 
             _messageHistory.Add(new AssistantChatMessage(responseBuilder.ToString()));
+            AuditLogger.LogAuditEvent("chatbot", "add_assistant_prompt", responseBuilder.ToString());
         }
         catch (Exception ex)
         {
