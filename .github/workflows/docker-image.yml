@@ -3,6 +3,8 @@
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -17,7 +19,7 @@ jobs:
           tenant: ${{ secrets.tenant }}
           registry: ${{ secrets.registry }}
           repository: ${{ secrets.repository }}
-          image: dramapal:latest dramapal:${{ steps.date.outputs.timestamp }}
+          image: dramapal
           git_access_token: ${{ secrets.git_access_token }}
           folder: ./
           dockerfile: Dockerfile
